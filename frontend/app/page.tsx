@@ -8,11 +8,29 @@ export default function Home() {
   const [text, setText] = useState<string>('');
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneticText, setPhoneticText] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value);
+    const newText = e.target.value;
+    setText(newText);
     if (error) setError(null);
+    
+    // Generate phonetic spelling
+    if (newText) {
+      // Simple phonetic conversion for demonstration
+      // In a real app, this would use a proper phonetic API
+      const simplified = newText
+        .toLowerCase()
+        .replace(/th/g, 'θ')
+        .replace(/ch/g, 'tʃ')
+        .replace(/sh/g, 'ʃ')
+        .replace(/ng/g, 'ŋ')
+        .replace(/zh/g, 'ʒ');
+      setPhoneticText(`/${simplified}/`);
+    } else {
+      setPhoneticText('');
+    }
   };
 
   const validateInput = (): boolean => {
@@ -46,10 +64,10 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-[hsl(var(--background))] to-[hsl(var(--background-end))] dark:bg-slate-900 bg-pattern">
       <div className="w-full max-w-2xl mx-auto space-y-8 p-6 sm:p-8 card-container dark:bg-slate-800/90 dark:border-slate-700/30">
         <div className="text-center space-y-3">
-          <h1 className="text-4xl font-bold tracking-tight text-primary dark:text-slate-100">
+          <h1 className="text-4xl font-bold tracking-tight text-primary dark:text-slate-100 text-improved">
             What can I help with?
           </h1>
-          <p className="text-muted-foreground dark:text-slate-400">
+          <p className="text-muted-foreground dark:text-slate-400 text-improved">
             Ask me anything or use the microphone to speak
           </p>
         </div>
@@ -63,10 +81,10 @@ export default function Home() {
                 placeholder="Ask anything"
                 value={text}
                 onChange={handleTextChange}
-                className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 py-7 px-8 text-lg text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+                className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 py-7 px-8 text-lg text-slate-800 dark:text-slate-100 placeholder:text-slate-400 text-improved"
                 aria-label="Ask anything"
                 aria-invalid={!!error}
-                aria-describedby={error ? "input-error" : undefined}
+                aria-describedby={error ? "input-error" : phoneticText ? "phonetic-text" : undefined}
               />
               <div className="absolute right-3 flex items-center">
                 <Button
@@ -75,7 +93,7 @@ export default function Home() {
                   aria-label={isRecording ? "Stop recording" : "Start recording"}
                   className={`rounded-md transition-all duration-300 ${
                     isRecording 
-                      ? 'bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 px-4 py-3' 
+                      ? 'bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 px-4 py-3 speech-active' 
                       : 'bg-transparent hover:bg-secondary/50 text-muted-foreground border border-transparent hover:border-input p-3'
                   }`}
                 >
@@ -86,6 +104,11 @@ export default function Home() {
             {error && (
               <p id="input-error" className="mt-2 text-sm text-red-500 pl-6">
                 {error}
+              </p>
+            )}
+            {!error && phoneticText && (
+              <p id="phonetic-text" className="phonetic-text w-[85%] mx-auto text-center" aria-label="Phonetic pronunciation">
+                {phoneticText}
               </p>
             )}
           </div>
