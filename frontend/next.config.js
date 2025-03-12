@@ -2,8 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: 'export', // Changed from 'standalone' to 'export'
+  output: 'export', // Static HTML export
   distDir: '.next',
+  outDir: 'out', // Explicitly set the output directory
+  trailingSlash: true, // Add trailing slashes to all URLs
   // Remove the rewrites since we're handling routing in Express
   env: {
     BACKEND_URL: process.env.NODE_ENV === 'production'

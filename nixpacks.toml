@@ -10,7 +10,10 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "cd /app/frontend && npm run build"
+  "cd /app/frontend && npm run build",
+  "mkdir -p /app/frontend/out",
+  "ls -la /app/frontend/.next || echo '.next directory not found'",
+  "ls -la /app/frontend/out || echo 'out directory not found'"
 ]
 
 [start]

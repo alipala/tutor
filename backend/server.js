@@ -28,25 +28,72 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'production') {
   import('path').then(path => {
     import('url').then(url => {
-      const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
-      const frontendPath = path.join(__dirname, '../frontend');
-      
-      // Serve Next.js static files
-      app.use('/_next', express.static(path.join(frontendPath, '.next')));
-      
-      // Serve public files
-      app.use(express.static(path.join(frontendPath, 'public')));
-      
-      // For all other routes, serve the Next.js app
-      app.get('*', (req, res) => {
-        if (req.url.startsWith('/api')) {
-          // Skip API routes
-          return;
+      import('fs').then(fs => {
+        const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+        const frontendPath = path.join(__dirname, '../frontend');
+        const outPath = path.join(frontendPath, 'out');
+        
+        console.log(`Serving Next.js files from: ${frontendPath}`);
+        
+        // Check if the out directory exists (for export mode)
+        if (fs.existsSync(outPath)) {
+          // Serve static files from the out directory
+          app.use(express.static(outPath));
+          
+          // For all non-API routes, serve the index.html
+          app.get('*', (req, res) => {
+            if (req.url.startsWith('/api')) {
+              // Skip API routes
+              return;
+            }
+            res.sendFile(path.join(outPath, 'index.html'));
+          });
+        } else {
+          // Fallback to .next directory (for standalone mode)
+          // Serve Next.js static files
+          app.use('/_next', express.static(path.join(frontendPath, '.next')));
+          
+          // Serve public files
+          app.use(express.static(path.join(frontendPath, 'public')));
+          
+          // For all other routes, serve the Next.js app
+          app.get('*', (req, res) => {
+            if (req.url.startsWith('/api')) {
+              // Skip API routes
+              return;
+            }
+            
+            // Try different possible paths for the index.html file
+            const possiblePaths = [
+              path.join(frontendPath, '.next/server/pages/index.html'),
+              path.join(frontendPath, '.next/static/index.html'),
+              path.join(frontendPath, '.next/index.html')
+            ];
+            
+            for (const filePath of possiblePaths) {
+              if (fs.existsSync(filePath)) {
+                return res.sendFile(filePath);
+              }
+            }
+            
+            // If no index.html is found, send a basic HTML response
+            res.send(`
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <title>Tutor App</title>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1">
+                </head>
+                <body>
+                  <h1>Welcome to Tutor App</h1>
+                  <p>The application is running, but the frontend build was not found.</p>
+                </body>
+              </html>
+            `);
+          });
         }
-        res.sendFile(path.join(frontendPath, '.next/server/pages/index.html'));
       });
-      
-      console.log(`Serving Next.js files from: ${frontendPath}`);
     });
   });
 }
