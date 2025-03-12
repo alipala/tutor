@@ -81,6 +81,9 @@
     /* Improved touch interaction */
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none; /* Prevent callout to copy image, etc when tap to hold */
+    -webkit-user-select: none; /* Prevent text selection when tapping quickly */
+    user-select: none;
     background: linear-gradient(135deg, hsl(var(--background)), hsl(var(--background-end)));
     background-attachment: fixed;
     min-height: 100vh;
@@ -184,6 +187,23 @@
   outline-offset: 2px;
 }
 
+/* Enhanced touch target styles */
+.touch-target {
+  position: relative;
+  margin: 8px;
+}
+
+/* Add invisible touch area extension */
+.touch-target::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  z-index: -1;
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .max-w-xl {
@@ -193,6 +213,17 @@
   h1 {
     font-size: 1.75rem;
   }
+  
+  /* Increase spacing for touch targets on small screens */
+  .touch-target {
+    margin: 12px 8px;
+  }
+  
+  /* Adjust button sizes for better touch */
+  button, .button {
+    min-height: 48px;
+    min-width: 48px;
+  }
 }
 
 /* Smooth transitions */
@@ -200,6 +231,34 @@
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
   transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Touch-specific styles */
+@media (hover: none) {
+  /* Styles for touch devices */
+  .end-conversation-btn:active, 
+  .mic-btn:active,
+  button:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+  }
+  
+  /* Prevent sticky hover states on touch devices */
+  .end-conversation-btn:hover,
+  .mic-btn:hover,
+  button:hover {
+    transform: none;
+    box-shadow: inherit;
+  }
+  
+  /* Only apply hover effects on actual active state for touch */
+  .end-conversation-btn:active::before {
+    opacity: 1;
+  }
+  
+  .end-conversation-btn:active svg {
+    transform: rotate(90deg);
+  }
 }
 
 /* Custom shadow for the input field */
@@ -396,6 +455,8 @@
 /* Microphone button styles */
 .mic-btn {
   position: relative;
+  min-height: 56px; /* Larger touch target for primary action */
+  min-width: 56px;
   background-image: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef);
   color: white;
   border-radius: 9999px;
