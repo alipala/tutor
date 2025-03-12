@@ -4,9 +4,10 @@
 
 @layer base {
   :root {
-    --background: 210 30% 98%;
-    --background-end: 220 30% 95%;
-    --foreground: 220 25% 10%;
+    /* Modern gradient background colors */
+    --background: 240 50% 98%;
+    --background-end: 260 60% 95%;
+    --foreground: 250 25% 18%;
     
     /* Font settings */
     --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -17,16 +18,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 16%;
 
-    --primary: 220 20% 16%;
+    --primary: 250 30% 20%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 20% 16%;
+    --secondary: 250 20% 96%;
+    --secondary-foreground: 250 30% 20%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 250 20% 96%;
+    --muted-foreground: 250 20% 46%;
 
-    --accent: 220 70% 46%;
+    --accent: 260 80% 50%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
@@ -77,6 +78,9 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Improved touch interaction */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -252,14 +256,135 @@
 
 /* Subtle card effect for containers */
 .card-container {
-  background-color: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
   border-radius: var(--radius);
   border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 /* Background pattern */
 .bg-pattern {
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Modern UI Enhancements */
+.gradient-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, #6366f1, #8b5cf6);
+}
+
+.gradient-bg {
+  background-image: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef);
+}
+
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(to right, #6366f1, #8b5cf6, #d946ef);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Touch-friendly improvements */
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Modern button styles */
+.btn-modern {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-modern::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-modern:hover::after {
+  opacity: 1;
+}
+
+/* End conversation button styles */
+.end-conversation-btn {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(135deg, #f87171, #f43f5e, #e11d48);
+  color: white;
+  font-weight: 500;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.2);
+  transition: all 0.3s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+}
+
+.end-conversation-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 20px -3px rgba(244, 63, 94, 0.3);
+}
+
+.end-conversation-btn:active {
+  transform: translateY(0);
+}
+
+.end-conversation-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.end-conversation-btn:hover svg {
+  transform: rotate(90deg);
+}
+
+/* Microphone button styles */
+.mic-btn {
+  position: relative;
+  background-image: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef);
+  color: white;
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.5);
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.mic-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px -5px rgba(139, 92, 246, 0.6);
+}
+
+.mic-btn:active {
+  transform: scale(0.98);
+}
+
+.mic-btn-ring {
+  position: absolute;
+  border-radius: 9999px;
+  background-image: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2), rgba(217, 70, 239, 0.2));
+  animation: pulse 2s infinite;
 }

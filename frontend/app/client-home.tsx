@@ -102,38 +102,37 @@ export default function ClientHome() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-[hsl(var(--background))] to-[hsl(var(--background-end))] dark:bg-slate-900 bg-pattern">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-br from-[hsl(var(--background))] via-[hsl(250,70%,97%)] to-[hsl(var(--background-end))] dark:from-slate-900 dark:via-indigo-950/90 dark:to-purple-950/90 bg-pattern">
       <div className="w-full max-w-4xl mx-auto h-full flex flex-col">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-primary dark:text-slate-100">
+          <h1 className="text-4xl font-bold tracking-tight gradient-text dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-indigo-200 dark:to-purple-300">
             Voice Conversation Assistant
           </h1>
-          <p className="text-muted-foreground dark:text-slate-400 mt-2">
+          <p className="text-muted-foreground dark:text-slate-400 mt-2 text-improved">
             Click the microphone to start talking
           </p>
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center">
           {/* Main Content Area - Split into two sections when messages are shown */}
-          <div className={`w-full flex ${showMessages ? 'flex-row' : 'flex-col items-center'} gap-8`}>
+          <div className={`w-full flex ${showMessages ? 'flex-row lg:flex-row md:flex-col sm:flex-col' : 'flex-col items-center'} gap-8`}>
             {/* Microphone Section */}
-            <div className={`${showMessages ? 'w-1/2' : 'w-full'} flex flex-col items-center justify-center`}>
+            <div className={`${showMessages ? 'w-1/2 lg:w-1/2 md:w-full sm:w-full' : 'w-full'} flex flex-col items-center justify-center`}>
               {/* Microphone UI - Only shown when not recording */}
               {!isRecording && !isAttemptingToRecord ? (
                 <div className="relative flex items-center justify-center transform transition-all duration-500">
                   {/* Decorative rings */}
-                  <div className="absolute w-36 h-36 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
-                  <div className="absolute w-32 h-32 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20"></div>
+                  <div className="absolute w-40 h-40 rounded-full mic-btn-ring"></div>
+                  <div className="absolute w-36 h-36 rounded-full mic-btn-ring" style={{ animationDelay: '0.5s' }}></div>
+                  <div className="absolute w-32 h-32 rounded-full mic-btn-ring" style={{ animationDelay: '1s' }}></div>
                   
                   {/* Microphone Button with gradient */}
                   <Button
                     type="button"
                     onClick={handleToggleRecording}
                     aria-label="Start recording"
-                    className="relative z-10 rounded-full w-28 h-28 flex items-center justify-center transition-all duration-500
-                      bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50
-                      hover:scale-105 border-4 border-white/20 dark:border-slate-700/30"
+                    className="mic-btn relative z-10 rounded-full w-28 h-28 flex items-center justify-center transition-all duration-500 touch-target"
                   >
                     <MicrophoneIcon isRecording={false} size={32} />
                   </Button>
@@ -179,7 +178,7 @@ export default function ClientHome() {
               
               {/* Status Text */}
               <div className="mt-6 text-center">
-                <p className="text-lg font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500">
+                <p className="text-lg font-medium gradient-text dark:from-indigo-400 dark:to-purple-400">
                   {isRecording ? "I'm listening..." : isAttemptingToRecord ? "Starting..." : "Click to speak"}
                 </p>
                 {(localError || realtimeError) && (
@@ -203,26 +202,25 @@ export default function ClientHome() {
               
               {/* End Conversation Button - Shown when recording or when there are messages */}
               {(isRecording || messages.length > 0) && (
-                <Button
+                <button
                   type="button"
                   onClick={handleEndConversation}
-                  className="mt-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700
-                    text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-red-500/20 hover:shadow-red-500/40
-                    transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                  className="end-conversation-btn mt-8 touch-target"
                 >
                   <span>End Conversation</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="9" y1="9" x2="15" y2="15"></line>
-                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
                   </svg>
-                </Button>
+                </button>
               )}
             </div>
             
             {/* Messages Section - Only shown when there are messages */}
             {showMessages && (
-              <div className="w-1/2 card-container dark:bg-slate-800/90 dark:border-slate-700/30 rounded-lg p-4 max-h-[500px] overflow-y-auto">
+              <div className="w-1/2 lg:w-1/2 md:w-full sm:w-full card-container dark:bg-slate-800/90 dark:border-slate-700/30 rounded-lg p-4 max-h-[500px] overflow-y-auto gradient-border">
+                
                 <h2 className="text-xl font-semibold mb-4 text-primary dark:text-slate-100">Conversation</h2>
                 <div className="space-y-4">
                   {messages.map((message: RealtimeMessage, index: number) => (
