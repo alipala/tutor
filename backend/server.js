@@ -6,11 +6,20 @@ import fetch from 'node-fetch';
 // Load environment variables
 dotenv.config();
 
+// Check if OpenAI API key is configured
+if (!process.env.OPENAI_API_KEY) {
+  console.error('ERROR: OPENAI_API_KEY is not configured in .env file');
+  console.log('Please add OPENAI_API_KEY=your_api_key to your .env file');
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Health check endpoint
@@ -18,12 +27,29 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Simple endpoint for testing connection
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Backend connection successful' });
+});
+
+// Mock ephemeral key endpoint for testing when OpenAI API key is not available
+app.post('/api/mock-token', (req, res) => {
+  console.log('Providing mock ephemeral key for testing');
+  res.json({
+    ephemeral_key: 'mock_ephemeral_key_for_testing',
+    expires_at: new Date(Date.now() + 3600000).toISOString() // 1 hour from now
+  });
+});
+
 // Endpoint to generate ephemeral keys for OpenAI Realtime API
 app.post('/api/realtime/token', async (req, res) => {
   try {
     if (!process.env.OPENAI_API_KEY) {
+      console.error('ERROR: OPENAI_API_KEY is not configured in .env file');
       return res.status(500).json({ error: 'OpenAI API key is not configured' });
     }
+    
+    console.log('Generating ephemeral key with OpenAI API...');
 
     const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
       method: 'POST',
