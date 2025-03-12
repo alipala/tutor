@@ -17,10 +17,20 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003'],
+  origin: process.env.NODE_ENV === 'production' 
+    ? [process.env.FRONTEND_URL || 'https://tutor-production.up.railway.app']
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003'],
   credentials: true
 }));
 app.use(express.json());
+
+// Serve static files from the frontend build directory in production
+if (process.env.NODE_ENV === 'production') {
+  const path = new URL('file://').pathname;
+  const frontendBuildPath = new URL('../frontend/.next/server/app', import.meta.url).pathname;
+  console.log(`Serving static files from: ${frontendBuildPath}`);
+  app.use(express.static(frontendBuildPath));
+}
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
