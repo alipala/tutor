@@ -26,10 +26,29 @@ app.use(express.json());
 
 // Serve static files from the frontend build directory in production
 if (process.env.NODE_ENV === 'production') {
-  const path = new URL('file://').pathname;
-  const frontendBuildPath = new URL('../frontend/.next/server/app', import.meta.url).pathname;
-  console.log(`Serving static files from: ${frontendBuildPath}`);
-  app.use(express.static(frontendBuildPath));
+  import('path').then(path => {
+    import('url').then(url => {
+      const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+      const frontendPath = path.join(__dirname, '../frontend');
+      
+      // Serve Next.js static files
+      app.use('/_next', express.static(path.join(frontendPath, '.next')));
+      
+      // Serve public files
+      app.use(express.static(path.join(frontendPath, 'public')));
+      
+      // For all other routes, serve the Next.js app
+      app.get('*', (req, res) => {
+        if (req.url.startsWith('/api')) {
+          // Skip API routes
+          return;
+        }
+        res.sendFile(path.join(frontendPath, '.next/server/pages/index.html'));
+      });
+      
+      console.log(`Serving Next.js files from: ${frontendPath}`);
+    });
+  });
 }
 
 // Health check endpoint
