@@ -1,1 +1,1 @@
-web: cd backend && node server.js
+web: cd /app/backend && node server.js
