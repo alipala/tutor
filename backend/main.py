@@ -38,8 +38,12 @@ app.add_middleware(
 
 # Serve static files in production
 if os.getenv("NODE_ENV") == "production":
-    # Get the absolute path to the frontend directory
-    frontend_path = Path(__file__).parent.parent / "frontend"
+    # Check for Docker environment first
+    docker_frontend_path = Path("/app/frontend")
+    local_frontend_path = Path(__file__).parent.parent / "frontend"
+    
+    # Determine which path to use
+    frontend_path = docker_frontend_path if docker_frontend_path.exists() else local_frontend_path
     out_path = frontend_path / "out"
     
     print(f"Serving Next.js files from: {frontend_path}")
