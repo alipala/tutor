@@ -23,7 +23,7 @@ app = FastAPI(title="Tutor Backend API")
 # CORS configuration
 origins = []
 if os.getenv("NODE_ENV") == "production":
-    frontend_url = os.getenv("FRONTEND_URL", "https://tutor-production.up.railway.app")
+    frontend_url = os.getenv("FRONTEND_URL", "https://taco.up.railway.app")
     origins = [frontend_url]
 else:
     origins = ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003"]
