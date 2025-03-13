@@ -2,12 +2,14 @@
 npmVersion = "10"
 nodeVersion = "20"
 pythonVersion = "3.11.9"
+aptPkgs = ["python3-pip", "python3-dev", "build-essential"]
 
 [phases.install]
 cmds = [
   "cd /app/backend && npm install",
   "cd /app/frontend && npm install",
-  "cd /app/backend && pip3 install -r requirements.txt"
+  "python3 -m pip install --upgrade pip setuptools wheel",
+  "cd /app/backend && python3 -m pip install -r requirements.txt"
 ]
 
 [phases.build]
