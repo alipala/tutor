@@ -36,6 +36,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Health check endpoint
+@app.get("/api/health")
+async def health_check():
+    return {"status": "ok"}
+
 # Serve static files in production
 if os.getenv("NODE_ENV") == "production":
     # Check for Docker environment first
@@ -48,9 +53,15 @@ if os.getenv("NODE_ENV") == "production":
     
     print(f"Serving Next.js files from: {frontend_path}")
     
+    # Create a sub-application for static files
+    from fastapi import FastAPI
+    static_app = FastAPI()
+    
     # Check if the out directory exists (for export mode)
     if out_path.exists():
-        app.mount("/", StaticFiles(directory=str(out_path), html=True), name="static")
+        # Mount static files to a sub-path to avoid conflicts with API routes
+        app.mount("/_next", StaticFiles(directory=str(out_path / "_next")), name="next-static")
+        app.mount("/static", StaticFiles(directory=str(out_path / "static")), name="static-files")
     else:
         # Fallback to .next directory (for standalone mode)
         next_path = frontend_path / ".next"
@@ -58,12 +69,7 @@ if os.getenv("NODE_ENV") == "production":
             app.mount("/_next", StaticFiles(directory=str(next_path)), name="next-static")
             
             if (frontend_path / "public").exists():
-                app.mount("/", StaticFiles(directory=str(frontend_path / "public"), html=True), name="public")
-
-# Health check endpoint
-@app.get("/api/health")
-async def health_check():
-    return {"status": "ok"}
+                app.mount("/static", StaticFiles(directory=str(frontend_path / "public")), name="public")
 
 # Simple endpoint for testing connection
 @app.get("/api/test")
@@ -121,14 +127,20 @@ async def generate_token():
         raise HTTPException(status_code=500, detail=f"Failed to generate ephemeral key: {str(e)}")
 
 # Fallback route for serving the index.html in production
+@app.get("/", response_class=HTMLResponse)
 @app.get("/{full_path:path}")
-async def serve_frontend(full_path: str, request: Request):
+async def serve_frontend(full_path: str = "", request: Request = None):
     # Skip API routes
-    if full_path.startswith("api/"):
+    if full_path and full_path.startswith("api/"):
         raise HTTPException(status_code=404, detail="Not Found")
     
     if os.getenv("NODE_ENV") == "production":
-        frontend_path = Path(__file__).parent.parent / "frontend"
+        # Check for Docker environment first
+        docker_frontend_path = Path("/app/frontend")
+        local_frontend_path = Path(__file__).parent.parent / "frontend"
+        
+        # Determine which path to use
+        frontend_path = docker_frontend_path if docker_frontend_path.exists() else local_frontend_path
         out_path = frontend_path / "out"
         
         # Check for the index.html in the out directory
@@ -137,13 +149,16 @@ async def serve_frontend(full_path: str, request: Request):
         
         # Try different possible paths for the index.html file
         possible_paths = [
+            frontend_path / "out/index.html",
             frontend_path / ".next/server/pages/index.html",
             frontend_path / ".next/static/index.html",
-            frontend_path / ".next/index.html"
+            frontend_path / ".next/index.html",
+            frontend_path / "public/index.html"
         ]
         
         for path in possible_paths:
             if path.exists():
+                print(f"Serving index.html from: {path}")
                 return FileResponse(str(path))
         
         # If no index.html is found, send a basic HTML response
