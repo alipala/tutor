@@ -1,11 +1,13 @@
 [phases.setup]
 npmVersion = "10"
 nodeVersion = "20"
+pythonVersion = "3.11.9"
 
 [phases.install]
 cmds = [
   "cd /app/backend && npm install",
-  "cd /app/frontend && npm install"
+  "cd /app/frontend && npm install",
+  "cd /app/backend && pip3 install -r requirements.txt"
 ]
 
 [phases.build]
@@ -17,4 +19,4 @@ cmds = [
 ]
 
 [start]
-cmd = "cd /app/backend && node server.js"
+cmd = "cd /app/backend && python -m uvicorn main:app --host=0.0.0.0 --port=${PORT:-8080}"
