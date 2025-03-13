@@ -33,7 +33,8 @@ ENV PORT=3001
 ENV NODE_ENV=production
 
 # Expose the port
-EXPOSE ${PORT}
+EXPOSE 3001
 
 # Command to run the application
-CMD ["python3", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
+# Use shell form to allow environment variable expansion
+CMD python3 -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
