@@ -53,23 +53,32 @@ if os.getenv("NODE_ENV") == "production":
     
     print(f"Serving Next.js files from: {frontend_path}")
     
-    # Create a sub-application for static files
-    from fastapi import FastAPI
-    static_app = FastAPI()
-    
+    # Mount static files only if the directories exist
     # Check if the out directory exists (for export mode)
     if out_path.exists():
-        # Mount static files to a sub-path to avoid conflicts with API routes
-        app.mount("/_next", StaticFiles(directory=str(out_path / "_next")), name="next-static")
-        app.mount("/static", StaticFiles(directory=str(out_path / "static")), name="static-files")
-    else:
-        # Fallback to .next directory (for standalone mode)
-        next_path = frontend_path / ".next"
-        if next_path.exists():
-            app.mount("/_next", StaticFiles(directory=str(next_path)), name="next-static")
-            
-            if (frontend_path / "public").exists():
-                app.mount("/static", StaticFiles(directory=str(frontend_path / "public")), name="public")
+        # Check and mount _next directory if it exists
+        next_static_path = out_path / "_next"
+        if next_static_path.exists():
+            print(f"Mounting /_next from {next_static_path}")
+            app.mount("/_next", StaticFiles(directory=str(next_static_path)), name="next-static")
+        
+        # Check and mount static directory if it exists
+        static_path = out_path / "static"
+        if static_path.exists():
+            print(f"Mounting /static from {static_path}")
+            app.mount("/static", StaticFiles(directory=str(static_path)), name="static-files")
+    
+    # Fallback to .next directory (for standalone mode)
+    next_path = frontend_path / ".next"
+    if next_path.exists():
+        print(f"Mounting /_next from {next_path}")
+        app.mount("/_next", StaticFiles(directory=str(next_path)), name="next-static")
+        
+        # Check and mount public directory if it exists
+        public_path = frontend_path / "public"
+        if public_path.exists():
+            print(f"Mounting /static from {public_path}")
+            app.mount("/static", StaticFiles(directory=str(public_path)), name="public")
 
 # Simple endpoint for testing connection
 @app.get("/api/test")
@@ -141,11 +150,7 @@ async def serve_frontend(full_path: str = "", request: Request = None):
         
         # Determine which path to use
         frontend_path = docker_frontend_path if docker_frontend_path.exists() else local_frontend_path
-        out_path = frontend_path / "out"
-        
-        # Check for the index.html in the out directory
-        if out_path.exists() and (out_path / "index.html").exists():
-            return FileResponse(str(out_path / "index.html"))
+        print(f"Looking for index.html in: {frontend_path}")
         
         # Try different possible paths for the index.html file
         possible_paths = [
@@ -153,13 +158,18 @@ async def serve_frontend(full_path: str = "", request: Request = None):
             frontend_path / ".next/server/pages/index.html",
             frontend_path / ".next/static/index.html",
             frontend_path / ".next/index.html",
-            frontend_path / "public/index.html"
+            frontend_path / "public/index.html",
+            # Add more fallback paths if needed
         ]
         
         for path in possible_paths:
-            if path.exists():
-                print(f"Serving index.html from: {path}")
-                return FileResponse(str(path))
+            try:
+                if path.exists():
+                    print(f"Serving index.html from: {path}")
+                    return FileResponse(str(path))
+            except Exception as e:
+                print(f"Error checking path {path}: {str(e)}")
+                continue
         
         # If no index.html is found, send a basic HTML response
         html_content = """
