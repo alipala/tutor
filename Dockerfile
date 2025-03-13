@@ -1,41 +1,32 @@
-# Use Node.js for frontend build and Python for backend
-FROM node:20-slim AS frontend
-
-# Set working directory for frontend
-WORKDIR /app
-
-# Copy package files for better caching
-COPY frontend/package*.json ./frontend/
-
-# Install frontend dependencies
-WORKDIR /app/frontend
-RUN npm install
-
-# Copy frontend source
-COPY frontend/ ./
-
-# Build frontend
-RUN npm run build
-
-# Python stage for backend
+# Use Python for the backend
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy backend requirements first for better caching
-COPY backend/requirements.txt ./backend/
+# Install Node.js for frontend
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    npm \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Copy the entire project
+COPY . .
+
+# Install backend dependencies
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-# Copy backend code
-COPY backend/ ./backend/
+# Install frontend dependencies and build
+WORKDIR /app/frontend
+RUN npm install
+RUN npm run build
 
-# Copy built frontend from previous stage
-COPY --from=frontend /app/frontend/.next ./frontend/.next
-COPY --from=frontend /app/frontend/out ./frontend/out
-COPY --from=frontend /app/frontend/public ./frontend/public
+# Back to app directory
+WORKDIR /app
 
 # Set environment variables
 ENV PORT=3001
