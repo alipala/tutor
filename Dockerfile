@@ -1,10 +1,10 @@
-# Use Python for the backend
+# Use Python for the backend and Node.js for frontend build
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install Node.js for frontend
+# Install Node.js for frontend build only
 RUN apt-get update && apt-get install -y \
     nodejs \
     npm \
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 # Copy the entire project
 COPY . .
 
-# Install backend dependencies
+# Install Python backend dependencies
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
 # Install frontend dependencies and build
