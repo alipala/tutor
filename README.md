@@ -1,6 +1,41 @@
 # Tutor Application
 
-A voice conversation application with a modern UI that allows users to interact through voice.
+A voice conversation application with a modern UI that allows users to interact through voice. The application uses FastAPI for the backend and Next.js for the frontend, with WebRTC for real-time communication.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/FastAPI-0.104.1-009688?style=for-the-badge&logo=fastapi" alt="FastAPI"/>
+  <img src="https://img.shields.io/badge/Next.js-14.0.4-000000?style=for-the-badge&logo=next.js" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python" alt="Python"/>
+  <img src="https://img.shields.io/badge/WebRTC-Real--time-4285F4?style=for-the-badge&logo=webrtc" alt="WebRTC"/>
+</p>
+
+## Features
+
+- 🎙️ Voice conversation with OpenAI integration
+- 🌐 WebRTC for real-time communication
+- 🚀 FastAPI backend for high performance
+- 🎨 Modern dark gradient UI
+- 📱 Responsive design for mobile and desktop
+- 🔄 Seamless frontend-backend integration
+
+## Architecture
+
+The application follows a modern architecture with a clear separation between frontend and backend:
+
+```
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│   Next.js   │◄────►│   FastAPI   │◄────►│   OpenAI    │
+│  Frontend   │      │   Backend   │      │     API     │
+└─────────────┘      └─────────────┘      └─────────────┘
+       ▲                     ▲
+       │                     │
+       └─────────┬───────────┘
+                 │
+         ┌───────▼──────┐
+         │    WebRTC    │
+         │ Communication │
+         └───────────────┘
+```
 
 ## Railway.app Deployment Guide
 
@@ -31,14 +66,13 @@ This application is configured for easy deployment on Railway.app.
    **Optional Variables:**
    - `PORT`: The port for your backend (Railway sets this automatically)
    - `FRONTEND_URL`: URL of your frontend (if deployed separately)
-   - `BACKEND_URL`: URL of your backend (if deployed separately)
 
 4. **Deploy the Application**
    - Railway will automatically detect the configuration and deploy your application
    - The deployment process will:
-     - Install dependencies for both frontend and backend
-     - Build the Next.js frontend
-     - Start the backend server
+     - Install Python dependencies for the backend
+     - Install Node.js dependencies and build the Next.js frontend
+     - Start the FastAPI server
 
 5. **Access Your Application**
    - Once deployed, Railway will provide a URL to access your application
@@ -49,32 +83,73 @@ This application is configured for easy deployment on Railway.app.
 To run the application locally:
 
 1. Clone the repository
-2. Install dependencies:
+   ```bash
+   git clone https://github.com/yourusername/tutor.git
+   cd tutor
    ```
-   npm run install:all
-   ```
-3. Create `.env` files:
-   - Copy `.env.example` to `.env` in the backend directory
-   - Copy `.env.example` to `.env.local` in the frontend directory
-   - Add your OpenAI API key to the backend `.env` file
 
-4. Start the development servers:
+2. Set up the backend:
+   ```bash
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   cp .env.example .env  # Then edit .env to add your OpenAI API key
    ```
+
+3. Set up the frontend:
+   ```bash
+   cd frontend
+   npm install
+   cp .env.example .env.local  # Then edit as needed
+   ```
+
+4. Start the backend server:
+   ```bash
+   # In the backend directory with venv activated
+   python -m backend.run
+   ```
+
+5. Start the frontend development server:
+   ```bash
+   # In the frontend directory
    npm run dev
    ```
 
-This will start both the backend (port 3001) and frontend (port 3000) in development mode.
+6. Access the application at http://localhost:3000
 
 ## Project Structure
 
-- `/backend`: Express.js server that handles API requests and OpenAI integration
-- `/frontend`: Next.js application with the user interface
-- `railway.json`: Configuration for Railway.app deployment
-- `Procfile`: Defines process types for deployment platforms
+```
+├── backend/                # FastAPI backend
+│   ├── main.py            # Main FastAPI application
+│   ├── run.py             # Entry point for running the server
+│   ├── requirements.txt   # Python dependencies
+│   └── test_api.py        # API tests
+├── frontend/              # Next.js frontend
+│   ├── components/        # React components
+│   ├── lib/               # Utility functions and services
+│   ├── pages/             # Next.js pages
+│   ├── public/            # Static assets
+│   └── styles/            # CSS styles
+├── Dockerfile             # Docker configuration
+├── railway.json           # Railway deployment configuration
+└── README.md             # Project documentation
+```
 
-## Features
+## API Endpoints
 
-- Modern dark gradient UI
-- Voice conversation functionality
-- WebRTC integration for real-time communication
-- Responsive design for mobile and desktop
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Health check endpoint |
+| `/api/test` | GET | Test connection endpoint |
+| `/api/realtime/token` | POST | Generate ephemeral key for OpenAI Realtime API |
+| `/api/mock-token` | POST | Mock token for testing |
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
